@@ -37,9 +37,39 @@
     "actions": [
       {
         "title": {
-          "en": "Turn Off"
+          "en": "Zone Control"
         },
-        "id": "airbase-turn-off"
+        "titleFormatted": {
+          "en": "Set [[zone_name]]  [[enabled]]"
+        },
+        "hint": {
+          "en": "Control individual zones"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "title": {
+              "en": "Device"
+            },
+            "filter": "driver_id=airbase"
+          },
+          {
+            "type": "text",
+            "name": "zone_name",
+            "placeholder": {
+              "en": "Zone 1"
+            }
+          },
+          {
+            "type": "checkbox",
+            "name": "enabled",
+            "title": {
+              "en": "Enabled"
+            }
+          }
+        ],
+        "id": "zone_control"
       }
     ]
   },
