@@ -6,8 +6,7 @@
   "runtime": "nodejs",
   "brandColor": "#2e96d0",
   "platforms": [
-    "local",
-    "cloud"
+    "local"
   ],
   "name": {
     "en": "Daikin Airbase"
