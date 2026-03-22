@@ -1,0 +1,26 @@
+{
+  "title": {
+    "en": "The zone is !{{on|off}}"
+  },
+  "titleFormatted": {
+    "en": "[[zone_name]] is !{{on|off}}"
+  },
+  "hint": {
+    "en": "Checks the state of a zone"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "title": { "en": "Device" },
+      "filter": "driver_id=airbase"
+    },
+    {
+      "type": "autocomplete",
+      "name": "zone_name",
+      "placeholder": {
+        "en": "Zone"
+      }
+    }
+  ]
+}

@@ -34,13 +34,44 @@
     }
   },
   "flow": {
+    "conditions": [
+      {
+        "title": {
+          "en": "The zone is !{{on|off}}"
+        },
+        "titleFormatted": {
+          "en": "[[zone_name]] is !{{on|off}}"
+        },
+        "hint": {
+          "en": "Checks the state of a zone"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "title": {
+              "en": "Device"
+            },
+            "filter": "driver_id=airbase"
+          },
+          {
+            "type": "autocomplete",
+            "name": "zone_name",
+            "placeholder": {
+              "en": "Zone 1"
+            }
+          }
+        ],
+        "id": "is_zone_enabled"
+      }
+    ],
     "actions": [
       {
         "title": {
           "en": "Zone Control"
         },
         "titleFormatted": {
-          "en": "Set [[zone_name]]  [[enabled]]"
+          "en": "Set [[zone_name]]'s zone to [[enabled]]"
         },
         "hint": {
           "en": "Control individual zones"
@@ -55,7 +86,7 @@
             "filter": "driver_id=airbase"
           },
           {
-            "type": "text",
+            "type": "autocomplete",
             "name": "zone_name",
             "placeholder": {
               "en": "Zone 1"
@@ -69,7 +100,7 @@
             }
           }
         ],
-        "id": "zone_control"
+        "id": "enable_zone"
       }
     ]
   },

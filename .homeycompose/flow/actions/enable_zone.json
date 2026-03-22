@@ -3,7 +3,7 @@
     "en": "Zone Control"
   },
   "titleFormatted": {
-    "en": "Set [[zone_name]]'s zone to [[enabled]]"
+    "en": "Set [[zone_name]] to [[enabled]]"
   },
   "hint": {
     "en": "Control individual zones"
@@ -16,10 +16,10 @@
       "filter": "driver_id=airbase"
     },
     {
-      "type": "text",
+      "type": "autocomplete",
       "name": "zone_name",
       "placeholder": {
-        "en": "Zone 1"
+        "en": "Zone"
       }
     },
     {
