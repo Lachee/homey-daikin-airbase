@@ -1,0 +1,30 @@
+{
+  "id": "dev.lachee.daikinairbase",
+  "version": "1.0.0",
+  "compatibility": ">=12.4.0",
+  "sdk": 3,
+  "runtime": "nodejs",
+  "platforms": [
+    "local",
+    "cloud"
+  ],
+  "name": {
+    "en": "Daikin Airbase"
+  },
+  "description": {
+    "en": "Adds support for Daikin Airbase ducted systems"
+  },
+  "category": [
+    "climate"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Lake Hopkins",
+    "email": "lake.hopkins@outlook.com"
+  }
+}

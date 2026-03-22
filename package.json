@@ -1,0 +1,19 @@
+{
+  "name": "dev.lachee.daikinairbase",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "start": "homey app run",
+    "install": "homey app install+",
+    "publish": "homey app publish"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^16.1.8",
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "daikin-airbase": "^0.1.1"
+  }
+}

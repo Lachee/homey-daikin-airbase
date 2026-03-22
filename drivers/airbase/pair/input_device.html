@@ -1,0 +1,69 @@
+<section>
+    <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend" data-i18n="pair.manual_legend"></legend>
+
+        <div class="homey-form-group">
+            <label class="homey-form-label" for="manual-ip" data-i18n="pair.manual_ip"></label>
+            <input
+                id="manual-ip"
+                class="homey-form-input"
+                type="text"
+                placeholder="192.168.1.50"
+                inputmode="decimal"
+            />
+        </div>
+    </fieldset>
+
+    <div class="actions">
+        <button id="manual-add-button" type="button" class="homey-button-primary-full">
+            Add by IP
+        </button>
+    </div>
+
+    <div id="manual-status" class="status muted"></div>
+</section>
+
+
+<script type="application/javascript">
+    /// <reference path="../../types/homey.browser.d.ts" />
+
+    async function addManualIp() {
+        console.log("Adding manual IP");
+        const ipElement = document.getElementById("manual-ip");
+        const status = document.getElementById("manual-status");
+
+        const ip = ipElement.value.trim();
+
+        if (!ip) {
+            console.error("No IP address provided");
+            await Homey.alert("Enter an IP address first.", "warning");
+            return;
+        }
+
+        try {
+            Homey.showLoadingOverlay();
+            console.log("Probing for the device...")
+            const device = await Homey.emit("probe", { ip });
+            await Homey.createDevice(device);
+            Homey.done();
+        } catch (error) {
+            status.textContent = "";
+            await Homey.alert(error.message || String(error), "error");
+        } finally {
+            Homey.hideLoadingOverlay();
+        }
+    }
+
+
+    function onHomeyReady(Homey) {
+        Homey.setTitle(Homey.__("pair.title"));
+        Homey.setSubtitle(Homey.__("pair.subtitle"));
+
+        console.log("Homey is ready", document.getElementById("manual-add-button"));
+        document.getElementById("manual-add-button").addEventListener("click", addManualIp);
+    }
+
+    (() => {
+        onHomeyReady(window.Homey)
+    })();
+</script>

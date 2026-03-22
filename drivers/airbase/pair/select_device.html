@@ -1,0 +1,184 @@
+<style>
+    #discover-status {
+        margin-bottom: 1em;
+    }
+
+    .device-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .device-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        background: var(--homey-color-background-secondary, #f5f5f5);
+    }
+
+    /* Skeleton state */
+    .skeleton {
+        pointer-events: none;
+    }
+
+    .skeleton-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--homey-color-line, #ddd);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .skeleton-lines {
+        flex: 1;
+    }
+
+    .skeleton-line {
+        height: 10px;
+        border-radius: 6px;
+        background: var(--homey-color-line, #ddd);
+        margin-bottom: 6px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .skeleton-line.short {
+        width: 40%;
+    }
+
+    .skeleton-line.long {
+        width: 70%;
+    }
+
+    /* Shimmer animation */
+    .skeleton-avatar::after,
+    .skeleton-line::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.5),
+                transparent
+        );
+        animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+</style>
+
+<!-- Discovering devices -->
+<section id="panel-discover" class="panel active">
+    <p class="muted" data-i18n="pair.discover_intro"></p>
+    <div id="discover-status" class="status muted"></div>
+    <div id="device-list" class="device-list scanning"></div>
+</section>
+
+<!-- Manually adding a device -->
+<section id="panel-manual" class="panel">
+    <button id="goto-manual-add-button" class="homey-button-secondary-full">Add by IP</button>
+</section>
+
+<script type="application/javascript">
+    /// <reference path="../../types/homey.browser.d.ts" />
+
+    const deviceTemplate = `
+            <button class="homey-button-primary-shadow homey-button-small" onclick="addListedDevice(this)" >Add</button>
+            <div class="skeleton-lines">
+                <div class="device-name"></div>
+                <div class="device-address"></div>
+            </div>
+      `;
+
+    const skeletonTemplate = `
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-lines">
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line long"></div>
+            </div>`;
+
+    async function addListedDevice(elm) {
+        console.log("Adding device", elm.parentElement)
+        const nodeId = elm.parentElement.getAttribute("data-device-id");
+        const ip = window.__discoveredDevices.find(device => device.id === nodeId).ip;
+        try {
+            Homey.showLoadingOverlay();
+            console.log("Probing for the device...")
+            const device = await Homey.emit("probe", { ip });
+            await Homey.createDevice(device);
+            Homey.done();
+        } catch (error) {
+            await Homey.alert(error.message || String(error), "error");
+        } finally {
+            Homey.hideLoadingOverlay();
+        }
+    }
+
+    async function discoverDevices() {
+        const status = document.getElementById("discover-status");
+        const list = document.getElementById("device-list");
+
+        status.textContent = "Scanning…";
+
+        // Only show the skeleton if we don't have any devices yet
+        if (!window.__discoveredDevices)
+            list.innerHTML = `<div class="device-row skeleton">${skeletonTemplate}</div>`
+
+        try {
+            // Fetch all the devices and show them
+            const devices = await Homey.emit("discover");
+            if (!Array.isArray(devices) || devices.length === 0) {
+                status.textContent = "No Daikin devices found.";
+                return;
+            }
+
+            status.textContent = `Found ${devices.length} device${devices.length === 1 ? "" : "s"}.`;
+            list.innerHTML = "";
+            for (const device of devices) {
+                const element = document.createElement("div");
+                element.innerHTML = deviceTemplate;
+                element.classList.add("device-row");
+                element.setAttribute("data-device-id", device.id);
+                list.prepend(element);
+
+                const titleElement = element.querySelector(".device-name");
+                const addressElement = element.querySelector(".device-address");
+                titleElement.textContent = device.name;
+                addressElement.textContent = device.ip;
+            }
+
+            window.__discoveredDevices = devices;
+        } catch (error) {
+            status.textContent = "";
+            await Homey.alert(error.message || String(error), "error");
+        } finally {
+        }
+    }
+
+    function onHomeyReady(Homey) {
+        Homey.setTitle(Homey.__("pair.title"));
+        Homey.setSubtitle(Homey.__("pair.subtitle"));
+
+        document.getElementById("goto-manual-add-button").addEventListener("click", () => {
+            Homey.showView("input_device");
+        })
+
+        setInterval(discoverDevices, 10_000);
+        discoverDevices();
+    }
+
+    (() => {
+        onHomeyReady(window.Homey)
+    })();
+</script>
