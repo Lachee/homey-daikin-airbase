@@ -4,8 +4,8 @@
   "scripts": {
     "build": "tsc",
     "start": "homey app run",
-    "install": "homey app install+",
-    "publish": "homey app publish"
+    "homey:install": "homey app install",
+    "homey:publish": "homey app publish"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.8",
