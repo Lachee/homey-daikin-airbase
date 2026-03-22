@@ -1,12 +1,70 @@
 import Homey from 'homey';
+import { DaikinClient } from 'daikin-airbase';
+
+const POLL_RATE = 30_000;
 
 class Device extends Homey.Device {
+
+  private client!: DaikinClient;
 
   /**
    * onInit is called when the device is initialized.
    */
   async onInit() {
-    this.log('MyDevice has been initialized');
+    const address = this.getStoreValue('address');
+    if (!address) {
+      this.error('No address stored for device');
+      return;
+    }
+
+    this.client = new DaikinClient({ host: address as string });
+    this.log('A airconditioner has been initialized: ', (await this.client.getBasicInfo()).name);
+
+    // Refresh the state every 30 seconds
+    await this.refreshControlState();
+    this.homey.setInterval(async () => {
+      try {
+        await this.refreshControlState();
+      } catch (err: any) {
+        this.error('Failed to update control info', err);
+      }
+    }, POLL_RATE);
+
+    // Add capability listeners
+    this.registerCapabilityListener("target_temperature", async (value: number) => {
+      await this.client.setTargetTemperature(Math.floor(value));
+    })
+
+    this.registerCapabilityListener("onoff", async (value: boolean) => {
+      await this.client.setPowered(value);
+    });
+
+    this.registerCapabilityListener("fan_speed", async (value: number) => {
+
+    })
+  }
+
+  /**
+   * Fetches the control info from the device and updates the capabilities.
+   */
+  private async refreshControlState() {
+    try {
+      const info = await this.client.getControlInfo();
+
+      // Report the first sensor temperature as measure_temperature
+      if (info.sensorTemperatures && info.sensorTemperatures.length > 0) {
+        const temperature = info.sensorTemperatures[0];
+        await this.setCapabilityValue('measure_temperature', temperature);
+      }
+
+      // Report the current target
+      await this.setCapabilityValue('target_temperature', info.targetTemperature);
+      await this.setCapabilityValue("onoff", info.power)
+
+
+    } catch (err: any) {
+      this.error('Error while updating control info', err);
+    }
   }
 
   /**

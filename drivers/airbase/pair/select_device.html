@@ -129,7 +129,7 @@
         const status = document.getElementById("discover-status");
         const list = document.getElementById("device-list");
 
-        status.textContent = "Scanning…";
+        status.textContent = "Looking for devices on the network…";
 
         // Only show the skeleton if we don't have any devices yet
         if (!window.__discoveredDevices)
@@ -139,7 +139,7 @@
             // Fetch all the devices and show them
             const devices = await Homey.emit("discover");
             if (!Array.isArray(devices) || devices.length === 0) {
-                status.textContent = "No Daikin devices found.";
+                status.textContent = "No devices found.";
                 return;
             }
 
