@@ -1,5 +1,11 @@
 import Homey from 'homey';
-import { DaikinClient } from 'daikin-airbase';
+import {ControlMode, DaikinClient} from 'daikin-airbase';
+import {
+  controlToThermostatMap,
+  fanSpeedToPercentage,
+  percentageToFanSpeed,
+  thermostatToControlMap
+} from "../../lib/Converters";
 
 const POLL_RATE = 30_000;
 
@@ -17,7 +23,7 @@ class Device extends Homey.Device {
       return;
     }
 
-    this.client = new DaikinClient({ host: address as string });
+    this.client = new DaikinClient({host: address as string});
     this.log('A airconditioner has been initialized: ', (await this.client.getBasicInfo()).name);
 
     // Refresh the state every 30 seconds
@@ -40,7 +46,28 @@ class Device extends Homey.Device {
     });
 
     this.registerCapabilityListener("fan_speed", async (value: number) => {
+      const fanSpeed = percentageToFanSpeed(value);
+      await this.client.setControlInfo({fanSpeed})
+    })
 
+    this.registerCapabilityListener("fan_mode", async (value: string) => {
+      switch (value) {
+        default:
+        case 'auto':
+          await this.client.setControlInfo({fanAuto: true, fanAirside: false});
+          break;
+        case 'on':
+          await this.client.setControlInfo({fanAuto: false, fanAirside: false});
+          break;
+        case 'airside':
+          await this.client.setControlInfo({fanAuto: false, fanAirside: true});
+          break;
+      }
+    })
+
+    this.registerCapabilityListener("thermostat_mode", async (value: string) => {
+      const mode = thermostatToControlMap[value];
+      await this.client.setMode(mode);
     })
   }
 
@@ -57,15 +84,27 @@ class Device extends Homey.Device {
         await this.setCapabilityValue('measure_temperature', temperature);
       }
 
-      // Report the current target
-      await this.setCapabilityValue('target_temperature', info.targetTemperature);
-      await this.setCapabilityValue("onoff", info.power)
+      // Report the other capabilities to make sure they are in sync.
+      //  We will check if their value is within in the correct range before snapping.
+      //  This is to keep analogue values present and to remember the user's preference, even if it makes no
+      //  real difference.
+      await this.setCapabilityValue("onoff", info.power);
 
+      if (Math.floor(this.getCapabilityValue("target_temperature")) != info.targetTemperature)
+        await this.setCapabilityValue('target_temperature', info.targetTemperature);
+
+      if (percentageToFanSpeed(this.getCapabilityValue("fan_speed")) != info.fanSpeed)
+        await this.setCapabilityValue("fan_speed", fanSpeedToPercentage(info.fanSpeed));
+
+      await this.setCapabilityValue("fan_mode", info.fanAirside ? "airside" : (info.fanAuto ? "auto" : "on"));
+
+      await this.setCapabilityValue("thermostat_mode", controlToThermostatMap[info.mode]);
 
     } catch (err: any) {
       this.error('Error while updating control info', err);
     }
   }
+
 
   /**
    * onAdded is called when the user adds the device, called just after pairing.
@@ -83,10 +122,10 @@ class Device extends Homey.Device {
    * @returns {Promise<string|void>} return a custom message that will be displayed
    */
   async onSettings({
-    oldSettings,
-    newSettings,
-    changedKeys,
-  }: {
+                     oldSettings,
+                     newSettings,
+                     changedKeys,
+                   }: {
     oldSettings: { [key: string]: boolean | string | number | undefined | null };
     newSettings: { [key: string]: boolean | string | number | undefined | null };
     changedKeys: string[];
