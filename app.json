@@ -5,6 +5,7 @@
   "compatibility": ">=12.4.0",
   "sdk": 3,
   "runtime": "nodejs",
+  "brandColor": "#2e96d0",
   "platforms": [
     "local",
     "cloud"
@@ -19,14 +20,18 @@
     "climate"
   ],
   "permissions": [],
-  "images": {
-    "small": "/assets/images/small.png",
-    "large": "/assets/images/large.png",
-    "xlarge": "/assets/images/xlarge.png"
-  },
   "author": {
     "name": "Lake Hopkins",
     "email": "lake.hopkins@outlook.com"
+  },
+  "source": "https://github.com/lachee/homey-daikin-airbase",
+  "bugs": {
+    "url": "https://github.com/lachee/homey-daikin-airbase/issues"
+  },
+  "contributing": {
+    "githubSponsors": {
+      "username": "lachee"
+    }
   },
   "flow": {
     "actions": [

@@ -1,4 +1,6 @@
 {
-  "pair.title": "Daikin Airbase",
-  "pair.subtitle": "Add Daikin Airbase devices"
+  "pair": {
+    "title": "New Device",
+    "subtitle": "Add a new device to Homey."
+  }
 }
