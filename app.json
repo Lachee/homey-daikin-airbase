@@ -44,7 +44,7 @@
           "en": "The zone is !{{on|off}}"
         },
         "titleFormatted": {
-          "en": "[[zone_name]] is !{{on|off}}"
+          "en": "[[zone_name]] is !{{active|inactive}}"
         },
         "hint": {
           "en": "Checks the state of a zone"
@@ -75,7 +75,7 @@
           "en": "Zone Control"
         },
         "titleFormatted": {
-          "en": "Set [[zone_name]] to [[enabled]]"
+          "en": "Set [[zone_name]] active to [[enabled]]"
         },
         "hint": {
           "en": "Control individual zones"

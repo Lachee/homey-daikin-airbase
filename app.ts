@@ -3,16 +3,21 @@
 import Homey, { Device, FlowCard } from 'homey';
 import { DaikinClient } from "daikin-airbase";
 
-type ZoneControlArgs = {
-  device: Device;
-  zone_name: string;
-  enabled: boolean;
-};
+type AutocompleteResult = {
+  id: string
+  name: string
+}
 
 type ZoneStateArgs = {
   device: Device;
-  zone_name: string;
+  zone_name: AutocompleteResult;
 }
+
+type ZoneControlArgs = {
+  device: Device;
+  zone_name: AutocompleteResult;
+  enabled: boolean;
+};
 
 function getDaikinClient(device: Device) {
   if (!('client' in device) || !device.client)
@@ -34,13 +39,13 @@ module.exports = class MyApp extends Homey.App {
     const zoneStateCondition = this.homey.flow.getConditionCard('is_zone_enabled');
     zoneStateCondition.registerArgumentAutocompleteListener("zone_name", this.onZoneNameAutocomplete);
     zoneStateCondition.registerRunListener(async ({ device, zone_name }: ZoneStateArgs, _) => {
-      return await getDaikinClient(device).zones.getZone(zone_name) === true;
+      return await getDaikinClient(device).zones.getZone(zone_name.id) === true;
     });
 
     const zoneControlAction = this.homey.flow.getActionCard('enable_zone');
     zoneControlAction.registerArgumentAutocompleteListener("zone_name", this.onZoneNameAutocomplete);
     zoneControlAction.registerRunListener(async ({ device, zone_name, enabled }: ZoneControlArgs) => {
-      await getDaikinClient(device).zones.setZone(zone_name, enabled);
+      await getDaikinClient(device).zones.setZone(zone_name.id, enabled);
     })
   }
 
