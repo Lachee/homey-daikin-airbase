@@ -1,7 +1,7 @@
 'use strict';
 
-import Homey, {Device, FlowCard} from 'homey';
-import {DaikinClient} from "daikin-airbase";
+import Homey, { Device, FlowCard } from 'homey';
+import { DaikinClient } from "daikin-airbase";
 
 type ZoneControlArgs = {
   device: Device;
@@ -14,7 +14,7 @@ type ZoneStateArgs = {
   zone_name: string;
 }
 
-function getDaikinClient(device : Device) {
+function getDaikinClient(device: Device) {
   if (!('client' in device) || !device.client)
     throw new Error(
       'Device does not have a client, cannot control zone'
@@ -33,25 +33,25 @@ module.exports = class MyApp extends Homey.App {
 
     const zoneStateCondition = this.homey.flow.getConditionCard('is_zone_enabled');
     zoneStateCondition.registerArgumentAutocompleteListener("zone_name", this.onZoneNameAutocomplete);
-    zoneStateCondition.registerRunListener(async ({ device, zone_name } : ZoneStateArgs, _) => {
+    zoneStateCondition.registerRunListener(async ({ device, zone_name }: ZoneStateArgs, _) => {
       return await getDaikinClient(device).zones.getZone(zone_name) === true;
     });
 
     const zoneControlAction = this.homey.flow.getActionCard('enable_zone');
-    zoneControlAction.registerArgumentAutocompleteListener("zone_name",  this.onZoneNameAutocomplete);
-    zoneControlAction.registerRunListener(async ({ device, zone_name, enabled } : ZoneControlArgs) => {
+    zoneControlAction.registerArgumentAutocompleteListener("zone_name", this.onZoneNameAutocomplete);
+    zoneControlAction.registerRunListener(async ({ device, zone_name, enabled }: ZoneControlArgs) => {
       await getDaikinClient(device).zones.setZone(zone_name, enabled);
     })
   }
 
-  private async onZoneNameAutocomplete(query: string, { device } : ZoneStateArgs) : Promise<FlowCard.ArgumentAutocompleteResults> {
-      const client = getDaikinClient(device);
-      if (client.zones.getCachedZones().length === 0)
-        await client.zones.getZones();
+  private async onZoneNameAutocomplete(query: string, { device }: ZoneStateArgs): Promise<FlowCard.ArgumentAutocompleteResults> {
+    const client = getDaikinClient(device);
+    if (client.zones.getCachedZones().length === 0)
+      await client.zones.getZones();
 
-      return client.zones.getCachedZones().map(zone => ({
-        id: zone.name,
-        name: zone.name,
-      })).filter(zone => zone.name.toLowerCase().includes(query.toLowerCase()));
+    return client.zones.getCachedZones().map(zone => ({
+      id: zone.name,
+      name: zone.name,
+    })).filter(zone => zone.name.toLowerCase().includes(query.toLowerCase()));
   }
 }
