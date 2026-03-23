@@ -36,16 +36,22 @@ module.exports = class MyApp extends Homey.App {
   async onInit() {
     this.log('Airbase has been initialized');
 
+    // Zone state condition
     const zoneStateCondition = this.homey.flow.getConditionCard('is_zone_enabled');
     zoneStateCondition.registerArgumentAutocompleteListener("zone_name", this.onZoneNameAutocomplete);
     zoneStateCondition.registerRunListener(async ({ device, zone_name }: ZoneStateArgs, _) => {
-      return await getDaikinClient(device).zones.getZone(zone_name.id) === true;
+      const zone = await getDaikinClient(device).zones.getZone(zone_name.id);
+      if (!zone) throw new Error(`Zone ${zone_name.id} not found`);
+      return zone.isOn;
     });
 
+    // Zone enabling control
     const zoneControlAction = this.homey.flow.getActionCard('enable_zone');
     zoneControlAction.registerArgumentAutocompleteListener("zone_name", this.onZoneNameAutocomplete);
     zoneControlAction.registerRunListener(async ({ device, zone_name, enabled }: ZoneControlArgs) => {
-      await getDaikinClient(device).zones.setZone(zone_name.id, enabled);
+      const zone = await getDaikinClient(device).zones.getZone(zone_name.id);
+      if (!zone) throw new Error(`Zone ${zone_name.id} not found`);
+      await getDaikinClient(device).zones.updateZone(zone.name, { isOn: enabled });
     })
   }
 
@@ -55,7 +61,7 @@ module.exports = class MyApp extends Homey.App {
       await client.zones.getZones();
 
     return client.zones.getCachedZones().map(zone => ({
-      id: zone.name,
+      id:   zone.name,
       name: zone.name,
     })).filter(zone => zone.name.toLowerCase().includes(query.toLowerCase()));
   }

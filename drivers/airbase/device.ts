@@ -1,5 +1,5 @@
 import Homey from 'homey';
-import {ControlMode, DaikinClient} from 'daikin-airbase';
+import { ControlMode, DaikinClient } from 'daikin-airbase';
 import {
   controlToThermostatMap,
   fanSpeedToPercentage,
@@ -23,7 +23,7 @@ class Device extends Homey.Device {
       return;
     }
 
-    this.client = new DaikinClient({host: address as string});
+    this.client = new DaikinClient({ host: address as string });
     this.log('A airconditioner has been initialized: ', (await this.client.getBasicInfo()).name);
 
     // Refresh the state every 30 seconds
@@ -47,20 +47,20 @@ class Device extends Homey.Device {
 
     this.registerCapabilityListener("fan_speed", async (value: number) => {
       const fanSpeed = percentageToFanSpeed(value);
-      await this.client.setControlInfo({fanSpeed})
+      await this.client.setControlInfo({ fanSpeed })
     })
 
     this.registerCapabilityListener("fan_mode", async (value: string) => {
       switch (value) {
         default:
         case 'auto':
-          await this.client.setControlInfo({fanAuto: true, fanAirside: false});
+          await this.client.setControlInfo({ fanAuto: true, fanAirside: false });
           break;
         case 'on':
-          await this.client.setControlInfo({fanAuto: false, fanAirside: false});
+          await this.client.setControlInfo({ fanAuto: false, fanAirside: false });
           break;
         case 'airside':
-          await this.client.setControlInfo({fanAuto: false, fanAirside: true});
+          await this.client.setControlInfo({ fanAuto: false, fanAirside: true });
           break;
       }
     })
