@@ -14,6 +14,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "daikin-airbase": "^0.2.0"
+    "daikin-airbase": "^0.3.0"
   }
 }

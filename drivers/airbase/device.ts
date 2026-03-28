@@ -76,18 +76,15 @@ class Device extends Homey.Device {
    */
   private async refreshControlState() {
     try {
-      const info = await this.client.getControlInfo();
-
       // Report the first sensor temperature as measure_temperature
-      if (info.sensorTemperatures && info.sensorTemperatures.length > 0) {
-        const temperature = info.sensorTemperatures[0];
-        await this.setCapabilityValue('measure_temperature', temperature);
-      }
+      const temp = await this.client.getInsideTemperature();
+      await this.setCapabilityValue('measure_temperature', temp);
 
       // Report the other capabilities to make sure they are in sync.
       //  We will check if their value is within in the correct range before snapping.
       //  This is to keep analogue values present and to remember the user's preference, even if it makes no
       //  real difference.
+      const info = await this.client.getControlInfo();
       await this.setCapabilityValue("onoff", info.power);
 
       if (Math.floor(this.getCapabilityValue("target_temperature")) != info.targetTemperature)
