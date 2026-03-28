@@ -1,6 +1,6 @@
 {
   "id": "dev.lachee.daikinairbase",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "compatibility": ">=12.4.0",
   "sdk": 3,
   "runtime": "nodejs",
